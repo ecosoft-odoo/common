@@ -240,7 +240,6 @@ class Report:
             'password': self.password(),
             'subreports': subreportDataFiles,
         }
-        print copy
         parameters = {
             'STANDARD_DIR': self.report.standardDirectory(),
             'REPORT_LOCALE': locale,
