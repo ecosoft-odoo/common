@@ -67,15 +67,6 @@ class Report:
         self.report = None
         self.temporaryFiles = []
         self.outputFormat = 'pdf'
-        # Get copies from report name
-        r_obj = self.pool.get('ir.actions.report.xml')
-        report_ids = r_obj.search(
-            cr, uid, [('report_name', '=', self.name[7:]),
-                      ('report_rml', 'ilike', '.jrxml')])
-        copies = report_ids and r_obj.browse(cr, uid,
-                                             report_ids[0]).copies or 1
-        self.data.update({'copies': copies})
-        # --
 
     def execute(self):
         """
