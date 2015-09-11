@@ -36,18 +36,21 @@ class TestAccountBilling(common.TransactionCase):
         self.bill_model = self.env['account.billing']
         self.partner_model = self.env['res.partner']
         self.partner_id = self.ref('base.res_partner_14')
-        self.journal_id = self.ref('account.sales_journal')
+        self.currency_id = self.ref('base.EUR')
         self.date = time.strftime('%Y-%m') + '-17'
         self.company_id = \
             self.company_model._company_default_get('account.billing')
 
     def test_normal_case(self):
-        res = self.bill_model.onchange_journal(self.journal_id,
-                                               self.partner_id,
-                                               self.date,
-                                               self.company_id)
+        res = self.bill_model.onchange_currency_id(self.company_id,
+                                                   self.currency_id,
+                                                   self.partner_id,
+                                                   self.date,
+                                                   )
         invoices = res['value']['line_cr_ids']
         billing_amount = res['value']['billing_amount']
         self.assertEqual(len(invoices), 1)
         self.assertEqual(billing_amount, 500)  # Amount equal to invoice_1
-        
+
+# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
+
