@@ -50,28 +50,6 @@ class AccountVoucher(models.Model):
             billing.payment_id = False
         return super(AccountVoucher, self).cancel_voucher()
 
-    @api.v7
-    def onchange_amount(self, cr, uid, ids,
-                        amount, rate, partner_id,
-                        journal_id, currency_id, ttype,
-                        date, payment_rate_currency_id,
-                        company_id, context=None):
-        if context is None:
-            context = {}
-        res = self.recompute_voucher_lines(cr, uid, ids,
-                                           partner_id, journal_id,
-                                           amount, currency_id, ttype,
-                                           date, context=context)
-        ctx = context.copy()
-        ctx.update({'date': date})
-        vals = self.onchange_rate(cr, uid, ids, rate, amount,
-                                  currency_id, payment_rate_currency_id,
-                                  company_id, context=ctx)
-        for key in vals.keys():
-            res[key].update(vals[key])
-        return res
-
-    @api.v7
     def onchange_billing_id(self, cr, uid, ids,
                             partner_id, journal_id, amount,
                             currency_id, ttype, date, context=None):
@@ -138,12 +116,12 @@ class AccountVoucher(models.Model):
         }
 
         # Drop existing lines
-        line_ids = ids and \
+        line_cr_ids = ids and \
             line_pool.search(cr, uid, [('voucher_id', '=', ids[0])]) or \
             False
 
-        if line_ids:
-            line_pool.unlink(cr, uid, line_ids)
+        if line_cr_ids:
+            line_pool.unlink(cr, uid, line_cr_ids)
 
         if not partner_id or not journal_id:
             return default
@@ -190,7 +168,7 @@ class AccountVoucher(models.Model):
                                   ('id', 'in', [line.reconcile and
                                                 line.move_line_id.id or
                                                 False
-                                                for line in billing.line_ids])
+                                                for line in billing.line_cr_ids])
                                   ], context=context)
         # -- kittiu
             else:
