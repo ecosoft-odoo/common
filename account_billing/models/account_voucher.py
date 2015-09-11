@@ -72,6 +72,65 @@ class AccountVoucher(models.Model):
             del(res['value']['payment_rate'])
         return res
 
+    def finalize_voucher_move_lines(self, cr, uid, ids, move_lines,
+                                    partner_id, journal_id, price,
+                                    currency_id, ttype, date, context=None):
+        """ finalize_account_move_lines(move_lines) -> move_lines
+
+            Hook method to be overridden in additional modules to verify and
+            possibly alter the move lines to be created by an voucher, for
+            special cases.
+            :param move_lines: list of dictionaries with the account.move.lines (as for create())
+            :return: the (possibly updated) final move_lines to create for this voucher
+        """
+        if context is None:
+            context = {}
+
+        # Rewrite code from get account type.
+        account_type = None
+        if context.get('account_id'):
+            account_type = self.pool['account.account'].browse(
+                                               cr, uid,
+                                               context['account_id'],
+                                               context=context).type
+        if ttype == 'payment':
+            if not account_type:
+                account_type = 'payable'
+        else:
+            if not account_type:
+                account_type = 'receivable'
+
+        move_line_pool = self.pool.get('account.move.line')
+        if not context.get('move_line_ids', False):
+            billing_id = context.get('billing_id', False)
+            if billing_id > 0:
+                billing_obj = self.pool.get('account.billing')
+                billing = billing_obj.browse(cr, uid,
+                                             billing_id, context=context)
+                ids = move_line_pool.search(
+                        cr, uid, [('state', '=', 'valid'),
+                                  ('account_id.type', '=', account_type),
+                                  ('reconcile_id', '=', False),
+                                  ('partner_id', '=', partner_id),
+                                  ('id', 'in', [line.reconcile and
+                                                line.move_line_id.id or
+                                                False
+                                                for line in billing.line_cr_ids])
+                                  ], context=context)
+            else:  # -- ecosoft
+                ids = move_line_pool.search(cr, uid, [('state','=','valid'),
+                                                      ('account_id.type', '=', account_type),
+                                                      ('reconcile_id', '=', False),
+                                                      ('partner_id', '=', partner_id)],
+                                            context=context)
+        else:
+            ids = context['move_line_ids']
+        # Or the lines by most old first
+        ids.reverse()
+        account_move_lines = move_line_pool.browse(cr, uid, ids, context=context)
+
+        return account_move_lines
+
     # Method overwritten
     def recompute_voucher_lines(self, cr, uid, ids, partner_id, journal_id, price, currency_id, ttype, date, context=None):
         """
@@ -142,27 +201,10 @@ class AccountVoucher(models.Model):
                 account_type = 'receivable'
 
         if not context.get('move_line_ids', False):
-            # ecosoft: Add code related to billing here.
-            print context
-            billing_id = context.get('billing_id', False)
-            if billing_id > 0:
-                billing_obj = self.pool.get('account.billing')
-                billing = billing_obj.browse(cr, uid,
-                                             billing_id, context=context)
-                ids = move_line_pool.search(
-                        cr, uid, [('state', '=', 'valid'),
-                                  ('account_id.type', '=', account_type),
-                                  ('reconcile_id', '=', False),
-                                  ('partner_id', '=', partner_id),
-                                  ('id', 'in', [line.reconcile and
-                                                line.move_line_id.id or
-                                                False
-                                                for line in billing.line_cr_ids])
-                                  ], context=context)
-            else:  # -- ecosoft
-                ids = move_line_pool.search(cr, uid, [('state','=','valid'), ('account_id.type', '=', account_type), ('reconcile_id', '=', False), ('partner_id', '=', partner_id)], context=context)
+            ids = move_line_pool.search(cr, uid, [('state','=','valid'), ('account_id.type', '=', account_type), ('reconcile_id', '=', False), ('partner_id', '=', partner_id)], context=context)
         else:
             ids = context['move_line_ids']
+
         invoice_id = context.get('invoice_id', False)
         company_currency = journal.company_id.currency_id.id
         move_lines_found = []
@@ -170,6 +212,15 @@ class AccountVoucher(models.Model):
         #order the lines by most old first
         ids.reverse()
         account_move_lines = move_line_pool.browse(cr, uid, ids, context=context)
+
+        # ecosoft, function hook.
+        account_move_lines = self.finalize_voucher_move_lines(
+                                                cr, uid, ids,
+                                                account_move_lines,
+                                                partner_id, journal_id, price,
+                                                currency_id, ttype, date,
+                                                context=context)
+        # --
 
         #compute the total debit/credit and look for a matching open amount or invoice
         for line in account_move_lines:
