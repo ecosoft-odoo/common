@@ -36,6 +36,8 @@
         'security/ir.model.access.csv',
         'views/account_billing.xml',
         'views/voucher_payment_receipt_view.xml',
+    ],
+    'demo': [
         # 'demo/account_invoice_demo.xml',
     ],
     'installable': True,
