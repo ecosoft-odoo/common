@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+	<data>		
+
+        <record id="view_account_transfer_filter" model="ir.ui.view">
+            <field name="name">view.account.transfer.filter</field>
+            <field name="model">account.transfer</field>
+            <field name="arch" type="xml">
+                <search string="Search Account Transfer">
+					<filter name="today" string="Today's" domain="[('date','=',time.strftime('%%Y-%%m-%%d'))]" help="Today's Transfer"/>
+                    <separator/>
+                    <filter name="draft" string="Draft" domain="[('state','=','draft')]"/>
+                    <filter name="done" string="Confirm" domain="[('state','=','done')]"/>
+                    <filter name="cancel" string="Cancelled" domain="[('state','=','cancel')]"/>
+                    <group expand="0" string="Group By...">
+                        <filter string="Source Journal" domain="[]" context="{'group_by':'src_journal_id'}"/>
+                        <filter string="Destination Journal" domain="[]" context="{'group_by':'dst_journal_id'}"/>
+                        <filter string="Status" domain="[]" context="{'group_by':'state'}"/>
+                        <filter string="Date" domain="[]" context="{'group_by':'date'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+	    <record id="view_account_transfer_tree" model="ir.ui.view">
+            <field name="name">Account Transfer List</field>
+            <field name="model">account.transfer</field>
+            <field name="arch" type="xml">
+                <tree string="Cash and Bank Transfer List">
+                    <field name="name"/>
+                    <field name="src_journal_id"/>
+                    <field name="src_partner_id"/>
+                    <field name="src_amount"/>
+                    <field name="dst_journal_id"/>
+                    <field name="dst_partner_id"/>
+                    <field name="dst_amount"/>
+                    <field name="state"/>
+                </tree>
+            </field>
+        </record>
+        <record id="view_account_transfer_form" model="ir.ui.view">
+            <field name="name">Account Transfer Form</field>
+            <field name="model">account.transfer</field>
+            <field name="arch" type="xml">
+                <form string="Cash and Bank Transfer" version="7.0">
+                    <header>
+                        <button name="transfer_draft" states="cancel" string="Draft"/>
+                        <button name="transfer_confirm" states="draft" string="Confirm" class="oe_highlight"/>
+                        <button name="transfer_done" states="confirm" string="Done" class="oe_highlight"/>
+                        <button name="transfer_cancel" states="draft,confirm,done" string="Cancel"/>
+                        <field name="state" widget="statusbar" statusbar_visible="draft,confirm,done" statusbar_colors='{"confirm":"blue"}'/>
+                    </header>
+                    <sheet>
+                        <div class="oe_title">
+                            <h1>
+                                <label string="Transfer " attrs="{'invisible':[('name','=','/')]}"/>
+                                <field name="name" class="oe_inline" attrs="{'invisible':[('name','=','/')]}"/>
+                            </h1>
+                        </div>
+                        <group>
+                            <group>
+                                <field name="date" readonly="0"/>
+                                
+                            </group>
+                            <group>
+                                <field name="company_id" groups="base.group_multi_company"/>
+                                <field name="origin"/>
+                                <field name="adjust_move" attrs="{'invisible':[('adjust_move','=',False)]}"/>
+                            </group>
+                        </group>
+                        <notebook>
+                            <page string="Details">
+                                <group>
+                                    <group>
+                                        <field name="src_journal_id" domain="[('type','in',['cash','bank']),('id','!=',dst_journal_id),('company_id','=',company_id)]" on_change="onchange_journal(src_journal_id,dst_journal_id,date,exchange_rate,src_amount)"/>
+                                        <field name="src_partner_id" attrs="{'invisible':[('src_have_partner','=',False)], 'required':[('src_have_partner','=',True)]}"/>
+                                        <field name="src_balance" attrs="{'invisible':[('state','!=','draft')]}"/>
+                                        <field name="src_amount" on_change="onchange_amount('src_amount',src_amount,dst_amount,exchange_rate)"/>
+                                        <field name="src_have_partner" invisible="1"/>
+                                    </group>
+                                    <group>
+                                        <field name="dst_journal_id" domain="[('type','in',['cash','bank']),('id','!=',src_journal_id),('company_id','=',company_id)]" on_change="onchange_journal(src_journal_id,dst_journal_id,date,exchange_rate,src_amount)"/>
+                                        <field name="dst_partner_id" attrs="{'invisible':[('dst_have_partner','=',False)], 'required':[('dst_have_partner','=',True)]}"/>
+                                        <field name="dst_balance" attrs="{'invisible':[('state','!=','draft')]}"/>
+                                        <field name="dst_amount" on_change="onchange_amount('dst_amount',src_amount,dst_amount,exchange_rate)"/>
+                                        <field name="dst_have_partner" invisible="1"/>
+                                        <field name="exchange" invisible="1"/>
+                                        <field name="exchange_rate" on_change="onchange_amount('exchange_rate',src_amount,dst_amount,exchange_rate)" attrs="{'readonly':['|',('exchange','=',False),('state','!=','draft')]}"/>
+                                        <field name="exchange_inv"/>
+                                    </group>
+                                </group>
+                            </page>
+                            <page string="Payments" attrs="{'invisible':[('state','=','draft')],'readonly':[('state','in',['done','cancel'])]}">
+                                <field name="adjust_move"/>
+                                <field name="voucher_ids"/>
+                            </page>
+                        </notebook>
+                    </sheet>
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids" widget="mail_followers"/>
+                        <field name="message_ids" widget="mail_thread"/>
+                    </div>
+                </form>
+            </field>
+	    </record>
+
+	    <record model="ir.actions.act_window" id="account_transfer_list_action">
+		    <field name="name">Cash and Bank Transfer</field>
+		    <field name="res_model">account.transfer</field>
+		    <field name="view_type">form</field>
+		    <field name="view_mode">tree,form</field>
+	    </record>
+
+	    <menuitem name='Cash and Bank Transfer' id='account_transfer_menu' parent='account.menu_finance_bank_and_cash' sequence='13' action="account_transfer_list_action"/>
+	    
+	</data>
+</openerp>
