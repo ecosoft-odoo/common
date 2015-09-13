@@ -27,7 +27,6 @@
     'depends': ['account',
                 'account_voucher',
                 'account_accountant',
-                # 'account_check_writing'
                 ],
     'data': [
         'data/account_billing_data.xml',
@@ -36,10 +35,7 @@
         'security/ir.model.access.csv',
         'views/account_billing.xml',
         'views/voucher_payment_receipt_view.xml',
-    ],
-    'demo': [
-        #'demo/account_invoice_demo.xml',
-    ],
+        ],
     'installable': True,
 }
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

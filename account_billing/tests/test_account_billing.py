@@ -39,7 +39,8 @@ class TestAccountBilling(common.TransactionCase):
         # Master Data
         self.company_id = self.env.user.company_id.id
         self.partner_id = self.ref('base.res_partner_3')  # China Export
-        self.product_id = self.ref('sale.advance_product_0_product_template')
+        self.product_id = \
+            self.ref('product.product_product_25_product_template')
         self.thb_currency_id = self.ref('base.THB')
         self.eur_currency_id = self.ref('base.EUR')
         self.date_15 = time.strftime('%Y-%m') + '-15'
