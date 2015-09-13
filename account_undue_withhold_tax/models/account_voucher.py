@@ -30,8 +30,8 @@ class common_voucher(object):
     @api.model
     def _to_invoice_currency(self, invoice, journal, amount):
         currency = invoice.currency_id.with_context(
-                                            date=invoice.date_invoice or
-                                            datetime.datetime.today())
+            date=invoice.date_invoice or
+            datetime.datetime.today())
         company_currency = (journal.currency and
                             journal.currency.id or
                             journal.company_id.currency_id)
@@ -41,8 +41,8 @@ class common_voucher(object):
     @api.model
     def _to_voucher_currency(self, invoice, journal, amount):
         currency = invoice.currency_id.with_context(
-                                            date=invoice.date_invoice or
-                                            datetime.datetime.today())
+            date=invoice.date_invoice or
+            datetime.datetime.today())
         company_currency = (journal.currency and
                             journal.currency.id or
                             journal.company_id.currency_id)
@@ -67,19 +67,19 @@ class account_voucher(common_voucher, models.Model):
                                  line_cr_ids,
                                  amount, _type):
         res = super(account_voucher, self)._compute_writeoff_amount(
-                                                            line_dr_ids,
-                                                            line_cr_ids,
-                                                            amount, _type)
+            line_dr_ids,
+            line_cr_ids,
+            amount, _type)
         debit = credit = 0.0
         sign = _type == 'payment' and -1 or 1
         for l in line_dr_ids:
             if isinstance(l, dict):
                 debit += l.get('amount_wht', 0.0) + \
-                            l.get('amount_retention', 0.0)  # Added
+                    l.get('amount_retention', 0.0)  # Added
         for l in line_cr_ids:
             if isinstance(l, dict):
                 credit += l.get('amount_wht', 0.0) + \
-                            l.get('amount_retention', 0.0)  # Added
+                    l.get('amount_retention', 0.0)  # Added
         return res - sign * (credit - debit)
 
     # Note: This method is not exactly the same as the line's one.
@@ -96,7 +96,7 @@ class account_voucher(common_voucher, models.Model):
             invoice = move_line.invoice
             for line in invoice.invoice_line:
                 revised_price = line.price_unit * \
-                                (1 - (line.discount or 0.0) / 100.0)
+                    (1 - (line.discount or 0.0) / 100.0)
                 # Only WHT
                 is_wht = True in [x.is_wht
                                   for x in
@@ -107,10 +107,10 @@ class account_voucher(common_voucher, models.Model):
                                     original_retention_amt)
                     ratio = (new_amt_orig and amount / new_amt_orig or 0.0)
                     taxes_list = line.invoice_line_tax_id.compute_all(
-                                                        revised_price * ratio,
-                                                        line.quantity,
-                                                        line.product_id,
-                                                        partner)['taxes']
+                        revised_price * ratio,
+                        line.quantity,
+                        line.product_id,
+                        partner)['taxes']
                     for tax in taxes_list:
                         account_tax = tax_obj.browse(tax['id'])
                         if account_tax.is_wht:
@@ -145,9 +145,9 @@ class account_voucher(common_voucher, models.Model):
                 amount_retention = invoice.amount_retention * ratio
                 # Change to currency at invoicing time.
                 amount_retention = self._to_voucher_currency(
-                                                    invoice,
-                                                    move_line.journal_id,
-                                                    amount_retention)
+                    invoice,
+                    move_line.journal_id,
+                    amount_retention)
         return float(amount), float(amount_retention)
 
     # The original recompute_voucher_lines() do not aware of withholding.
@@ -157,8 +157,8 @@ class account_voucher(common_voucher, models.Model):
     def recompute_voucher_lines(self, partner_id, journal_id,
                                 price, currency_id, ttype, date):
         res = super(account_voucher, self).recompute_voucher_lines(
-                                            partner_id, journal_id,
-                                            price, currency_id, ttype, date)
+            partner_id, journal_id,
+            price, currency_id, ttype, date)
         line_cr_ids = res['value']['line_cr_ids']
         line_dr_ids = res['value']['line_dr_ids']
         # For Register Payment on Invoice, remove
@@ -182,16 +182,16 @@ class account_voucher(common_voucher, models.Model):
             line_obj = self.env['account.voucher.line']
             original_amount, \
                 original_wht_amt = line_obj._get_amount_wht(
-                                                    partner_id,
-                                                    line['move_line_id'],
-                                                    line['amount_original'],
-                                                    line['amount_original'])
+                    partner_id,
+                    line['move_line_id'],
+                    line['amount_original'],
+                    line['amount_original'])
             original_amount, \
                 original_retention_amt = line_obj._get_amount_retention(
-                                                    partner_id,
-                                                    line['move_line_id'],
-                                                    line['amount_original'],
-                                                    line['amount_original'])
+                    partner_id,
+                    line['move_line_id'],
+                    line['amount_original'],
+                    line['amount_original'])
             # Full amount to reconcile
             new_amt_orig = (original_amount -
                             original_wht_amt -
@@ -231,19 +231,19 @@ class account_voucher(common_voucher, models.Model):
             # ** Calculate withholding amount **
             if amount_alloc:
                 amount, amount_wht = self._get_amount_wht_ex(
-                                                     partner_id,
-                                                     line['move_line_id'],
-                                                     line['amount_original'],
-                                                     original_wht_amt,
-                                                     original_retention_amt,
-                                                     amount_alloc)
+                    partner_id,
+                    line['move_line_id'],
+                    line['amount_original'],
+                    original_wht_amt,
+                    original_retention_amt,
+                    amount_alloc)
                 amount, amount_retention = self._get_amount_retention_ex(
-                                                     partner_id,
-                                                     line['move_line_id'],
-                                                     line['amount_original'],
-                                                     original_retention_amt,
-                                                     original_wht_amt,
-                                                     amount_alloc)
+                    partner_id,
+                    line['move_line_id'],
+                    line['amount_original'],
+                    original_retention_amt,
+                    original_wht_amt,
+                    amount_alloc)
             # Adjust remaining
             remain_amount = remain_amount + (sign * amount_alloc)
             line['amount'] = amount + amount_wht + amount_retention
@@ -304,8 +304,8 @@ class account_voucher(common_voucher, models.Model):
         move_line_pool = self.pool.get('account.move.line')
         for voucher in self.browse(cr, uid, ids, context=context):
             local_context = dict(
-                             context,
-                             force_company=voucher.journal_id.company_id.id)
+                context,
+                force_company=voucher.journal_id.company_id.id)
             if voucher.move_id:
                 continue
             company_currency = self._get_company_currency(cr, uid,
@@ -322,19 +322,19 @@ class account_voucher(common_voucher, models.Model):
             # Create the account move record.
             move_id = move_pool.create(cr, uid,
                                        self.account_move_get(
-                                            cr, uid,
-                                            voucher.id, context=context),
+                                           cr, uid,
+                                           voucher.id, context=context),
                                        context=context)
             # Get the name of the account_move just created
             name = move_pool.browse(cr, uid, move_id, context=context).name
             # Create the first line of the voucher
             move_line_id = move_line_pool.create(
-                                    cr, uid,
-                                    self.first_move_line_get(
-                                            cr, uid, voucher.id,
-                                            move_id, company_currency,
-                                            current_currency, local_context),
-                                    local_context)
+                cr, uid,
+                self.first_move_line_get(
+                    cr, uid, voucher.id,
+                    move_id, company_currency,
+                    current_currency, local_context),
+                local_context)
             move_line_brw = move_line_pool.browse(cr, uid,
                                                   move_line_id,
                                                   context=context)
@@ -346,40 +346,40 @@ class account_voucher(common_voucher, models.Model):
             # --
             if voucher.type == 'sale':
                 line_total = line_total - self._convert_amount(
-                                                    cr, uid,
-                                                    voucher.tax_amount,
-                                                    voucher.id, context=ctx)
+                    cr, uid,
+                    voucher.tax_amount,
+                    voucher.id, context=ctx)
             elif voucher.type == 'purchase':
                 line_total = line_total + self._convert_amount(
-                                                    cr, uid,
-                                                    voucher.tax_amount,
-                                                    voucher.id, context=ctx)
+                    cr, uid,
+                    voucher.tax_amount,
+                    voucher.id, context=ctx)
             # ecosoft
             elif voucher.type in ('receipt', 'payment'):
                 net_tax = self.voucher_move_line_tax_create(
-                                                    cr, uid, voucher,
-                                                    move_id, company_currency,
-                                                    current_currency, context)
+                    cr, uid, voucher,
+                    move_id, company_currency,
+                    current_currency, context)
                 net_retention = self.voucher_move_line_retention_create(
-                                                    cr, uid, voucher,
-                                                    move_id, company_currency,
-                                                    current_currency, context)
+                    cr, uid, voucher,
+                    move_id, company_currency,
+                    current_currency, context)
             # --
             # Create one move line per voucher line where amount is not 0.0
             line_total, rec_list_ids = self.voucher_move_line_create(
-                                                    cr, uid,
-                                                    voucher.id, line_total,
-                                                    move_id, company_currency,
-                                                    current_currency, context)
+                cr, uid,
+                voucher.id, line_total,
+                move_id, company_currency,
+                current_currency, context)
             # ecosoft - Thai Accounting, adjust with tax before writeoff.
             line_total = line_total + net_tax + net_retention
             # --
             # Create the writeoff line if needed
             ml_writeoff = self.writeoff_move_line_get(
-                                          cr, uid,
-                                          voucher.id, line_total, move_id,
-                                          name, company_currency,
-                                          current_currency, local_context)
+                cr, uid,
+                voucher.id, line_total, move_id,
+                name, company_currency,
+                current_currency, local_context)
             if ml_writeoff:
                 move_line_pool.create(cr, uid, ml_writeoff, local_context)
             # We post the voucher.
@@ -430,7 +430,7 @@ class account_voucher(common_voucher, models.Model):
         vtml = self.move_line_get(voucher)
         # create gain/loss from currency between invoice and voucher
         net_retention_currency, vtml = self.compute_net_retention(
-                                              voucher, company_currency, vtml)
+            voucher, company_currency, vtml)
         # Create move line,
         for ml in vtml:
             ml.update({'move_id': move_id})
@@ -446,9 +446,9 @@ class account_voucher(common_voucher, models.Model):
         for t in self._cr.dictfetchall():
             prop = voucher.type in ('sale', 'purchase') \
                 and self.env['ir.property'].get(
-                        'property_account_retention_customer', 'res.partner') \
+                'property_account_retention_customer', 'res.partner') \
                 or self.env['ir.property'].get(
-                        'property_account_retention_supplier', 'res.partner')
+                'property_account_retention_supplier', 'res.partner')
             account = self.env['account.fiscal.position'].map_account(prop)
             res.append({
                 'type': 'src',
@@ -598,8 +598,8 @@ class account_voucher(common_voucher, models.Model):
     def onchange_journal(self, journal_id, line_ids, tax_id, partner_id,
                          date, amount, ttype, company_id):
         res = super(account_voucher, self).onchange_journal(
-                                    journal_id, line_ids, tax_id, partner_id,
-                                    date, amount, ttype, company_id)
+            journal_id, line_ids, tax_id, partner_id,
+            date, amount, ttype, company_id)
         if 'default_amount' in self._context and res:
             vline_obj = self.env['account.voucher.line']
             if amount == 0.0:  # Sum amount for the line to reconcile
@@ -607,9 +607,9 @@ class account_voucher(common_voucher, models.Model):
                 for line in lines:
                     for l in res['value'].get(line, []):
                         val = vline_obj.onchange_reconcile(
-                                partner_id,
-                                l['move_line_id'], l['amount_original'],
-                                True, l['amount'], l['amount_unreconciled'])
+                            partner_id,
+                            l['move_line_id'], l['amount_original'],
+                            True, l['amount'], l['amount_unreconciled'])
                         amount += (val['value']['amount'] +
                                    val['value']['amount_wht'] +
                                    val['value']['amount_retention'])
@@ -659,10 +659,10 @@ class account_voucher_line(common_voucher, models.Model):
                     ratio = (float(amount_original) and
                              (float(amount) / float(amount_original)) or 0.0)
                     tax_list = line.invoice_line_tax_id.compute_all(
-                                               float(revised_price) * ratio,
-                                               line.quantity,
-                                               line.product_id,
-                                               partner)['taxes']
+                        float(revised_price) * ratio,
+                        line.quantity,
+                        line.product_id,
+                        partner)['taxes']
                     for tax in tax_list:
                         account_tax = tax_obj.browse(tax['id'])
                         if account_tax.is_wht:
@@ -688,9 +688,9 @@ class account_voucher_line(common_voucher, models.Model):
                 amount_retention = invoice.amount_retention * ratio
                 # Change to currency at invoicing time.
                 amount_retention = self._to_voucher_currency(
-                                                    invoice,
-                                                    move_line.journal_id,
-                                                    amount_retention)
+                    invoice,
+                    move_line.journal_id,
+                    amount_retention)
         return float(amount), float(amount_retention)
 
     @api.multi
@@ -699,15 +699,15 @@ class account_voucher_line(common_voucher, models.Model):
         vals = {}
         prec = self.env['decimal.precision'].precision_get('Account')
         amount, amount_wht = self._get_amount_wht(
-                                              partner_id,
-                                              move_line_id,
-                                              amount_original,
-                                              amount)
+            partner_id,
+            move_line_id,
+            amount_original,
+            amount)
         amount, amount_retention = self._get_amount_retention(
-                                                          partner_id,
-                                                          move_line_id,
-                                                          amount_original,
-                                                          amount)
+            partner_id,
+            move_line_id,
+            amount_original,
+            amount)
         vals['amount_wht'] = -round(amount_wht, prec)
         vals['amount_retention'] = -round(amount_retention, prec)
         vals['reconcile'] = (round(amount) == round(amount_unreconciled))
@@ -721,15 +721,15 @@ class account_voucher_line(common_voucher, models.Model):
         if reconcile:
             amount = amount_unreconciled
             amount, amount_wht = self._get_amount_wht(
-                                                  partner_id,
-                                                  move_line_id,
-                                                  amount_original,
-                                                  amount)
+                partner_id,
+                move_line_id,
+                amount_original,
+                amount)
             amount, amount_retention = self._get_amount_retention(
-                                                              partner_id,
-                                                              move_line_id,
-                                                              amount_original,
-                                                              amount)
+                partner_id,
+                move_line_id,
+                amount_original,
+                amount)
             vals['amount_wht'] = -round(amount_wht, prec)
             vals['amount_retention'] = -round(amount_retention, prec)
             vals['amount'] = round(amount, prec)
@@ -836,17 +836,17 @@ class account_voucher_tax(common_voucher, models.Model):
             val['tax_id'] = tax['id']
             val['name'] = tax['name']
             val['amount'] = self._to_voucher_currency(
-                                        invoice, journal,
-                                        (tax['amount'] *
-                                         payment_ratio *
-                                         line_sign))
+                invoice, journal,
+                (tax['amount'] *
+                 payment_ratio *
+                 line_sign))
             val['manual'] = False
             val['sequence'] = tax['sequence']
             val['base'] = self._to_voucher_currency(
-                                    invoice, journal,
-                                    voucher_cur.round(
-                                        tax['price_unit'] * line.quantity) *
-                                    payment_ratio * line_sign)
+                invoice, journal,
+                voucher_cur.round(
+                    tax['price_unit'] * line.quantity) *
+                payment_ratio * line_sign)
             # For Suspend
             vals = {}
             vals['voucher_id'] = voucher.id
@@ -854,17 +854,17 @@ class account_voucher_tax(common_voucher, models.Model):
             vals['tax_id'] = tax['id']
             vals['name'] = tax['name']
             vals['amount'] = self._to_invoice_currency(
-                                        invoice, journal,
-                                        (-tax['amount'] *
-                                         payment_ratio *
-                                         line_sign))
+                invoice, journal,
+                (-tax['amount'] *
+                 payment_ratio *
+                 line_sign))
             vals['manual'] = False
             vals['sequence'] = tax['sequence']
             vals['base'] = self._to_invoice_currency(
-                                    invoice, journal,
-                                    -voucher_cur.round(
-                                        tax['price_unit'] * line.quantity) *
-                                    payment_ratio * line_sign)
+                invoice, journal,
+                -voucher_cur.round(
+                    tax['price_unit'] * line.quantity) *
+                payment_ratio * line_sign)
 
             # Register Currency Gain for Normal
             val['tax_currency_gain'] = -(val['amount'] + vals['amount'])
@@ -888,13 +888,13 @@ class account_voucher_tax(common_voucher, models.Model):
                     val['base_code_id'] = tax['base_code_id']
                     val['tax_code_id'] = tax['tax_code_id']
                     val['base_amount'] = voucher_cur.compute(
-                                            val['base'] *
-                                            tax['base_sign'],
-                                            company_currency) * payment_ratio
+                        val['base'] *
+                        tax['base_sign'],
+                        company_currency) * payment_ratio
                     val['tax_amount'] = voucher_cur.compute(
-                                            val['amount'] *
-                                            tax['tax_sign'],
-                                            company_currency) * payment_ratio
+                        val['amount'] *
+                        tax['tax_sign'],
+                        company_currency) * payment_ratio
                     val['account_id'] = (tax['account_collected_id'] or
                                          line.account_id.id)
                     val['account_analytic_id'] = \
@@ -903,13 +903,13 @@ class account_voucher_tax(common_voucher, models.Model):
                     val['base_code_id'] = tax['ref_base_code_id']
                     val['tax_code_id'] = tax['ref_tax_code_id']
                     val['base_amount'] = voucher_cur.compute(
-                                            val['base'] *
-                                            tax['ref_base_sign'],
-                                            company_currency) * payment_ratio
+                        val['base'] *
+                        tax['ref_base_sign'],
+                        company_currency) * payment_ratio
                     val['tax_amount'] = voucher_cur.compute(
-                                        val['amount'] *
-                                        tax['ref_tax_sign'],
-                                        company_currency) * payment_ratio
+                        val['amount'] *
+                        tax['ref_tax_sign'],
+                        company_currency) * payment_ratio
                     val['account_id'] = (tax['account_paid_id'] or
                                          line.account_id.id)
                     val['account_analytic_id'] = \
@@ -946,13 +946,13 @@ class account_voucher_tax(common_voucher, models.Model):
                     val['base_code_id'] = tax['base_code_id']
                     val['tax_code_id'] = tax['tax_code_id']
                     val['base_amount'] = voucher_cur.compute(
-                                            val['base'] *
-                                            tax['base_sign'],
-                                            company_currency) * payment_ratio
+                        val['base'] *
+                        tax['base_sign'],
+                        company_currency) * payment_ratio
                     val['tax_amount'] = voucher_cur.compute(
-                                            val['amount'] *
-                                            tax['tax_sign'],
-                                            company_currency) * payment_ratio
+                        val['amount'] *
+                        tax['tax_sign'],
+                        company_currency) * payment_ratio
                     val['account_id'] = (tax['account_collected_id'] or
                                          line.account_id.id)
                     val['account_analytic_id'] = \
@@ -962,13 +962,13 @@ class account_voucher_tax(common_voucher, models.Model):
                     val['base_code_id'] = tax['ref_base_code_id']
                     val['tax_code_id'] = tax['ref_tax_code_id']
                     val['base_amount'] = voucher_cur.compute(
-                                            val['base'] *
-                                            tax['ref_base_sign'],
-                                            company_currency) * payment_ratio
+                        val['base'] *
+                        tax['ref_base_sign'],
+                        company_currency) * payment_ratio
                     val['tax_amount'] = voucher_cur.compute(
-                                        val['amount'] *
-                                        tax['ref_tax_sign'],
-                                        company_currency) * payment_ratio
+                        val['amount'] *
+                        tax['ref_tax_sign'],
+                        company_currency) * payment_ratio
                     val['account_id'] = (tax['account_paid_id'] or
                                          line.account_id.id)
                     val['account_analytic_id'] = \
@@ -998,13 +998,13 @@ class account_voucher_tax(common_voucher, models.Model):
                     vals['base_code_id'] = tax['base_code_id']
                     vals['tax_code_id'] = tax['tax_code_id']
                     vals['base_amount'] = -voucher_cur.compute(
-                                            val['base'] *
-                                            tax['base_sign'],
-                                            company_currency) * payment_ratio
+                        val['base'] *
+                        tax['base_sign'],
+                        company_currency) * payment_ratio
                     vals['tax_amount'] = -voucher_cur.compute(
-                                            val['amount'] *
-                                            tax['tax_sign'],
-                                            company_currency) * payment_ratio
+                        val['amount'] *
+                        tax['tax_sign'],
+                        company_currency) * payment_ratio
                     # USE SUSPEND ACCOUNT HERE
                     vals['account_id'] = \
                         (tax['account_suspend_collected_id'] or
@@ -1015,13 +1015,13 @@ class account_voucher_tax(common_voucher, models.Model):
                     vals['base_code_id'] = tax['ref_base_code_id']
                     vals['tax_code_id'] = tax['ref_tax_code_id']
                     vals['base_amount'] = -voucher_cur.compute(
-                                            val['base'] *
-                                            tax['ref_base_sign'],
-                                            company_currency) * payment_ratio
+                        val['base'] *
+                        tax['ref_base_sign'],
+                        company_currency) * payment_ratio
                     vals['tax_amount'] = -voucher_cur.compute(
-                                            val['amount'] *
-                                            tax['ref_tax_sign'],
-                                            company_currency) * payment_ratio
+                        val['amount'] *
+                        tax['ref_tax_sign'],
+                        company_currency) * payment_ratio
                     # USE SUSPEND ACCOUNT HERE
                     vals['account_id'] = (tax['account_suspend_paid_id'] or
                                           line.account_id.id)
@@ -1065,15 +1065,15 @@ class account_voucher_tax(common_voucher, models.Model):
             # Each invoice line, calculate tax
             revised_price = line.price_unit * (1 - (line.discount / 100.0))
             taxes = line.invoice_line_tax_id.compute_all(
-                                                 revised_price,
-                                                 line.quantity,
-                                                 line.product_id,
-                                                 invoice.partner_id)['taxes']
+                revised_price,
+                line.quantity,
+                line.product_id,
+                invoice.partner_id)['taxes']
             tax_gp = self._compute_one_tax_grouped(
-                                       taxes, voucher, voucher_cur, invoice,
-                                       invoice_cur, company_currency,
-                                       journal, line_sign, payment_ratio,
-                                       line, revised_price)
+                taxes, voucher, voucher_cur, invoice,
+                invoice_cur, company_currency,
+                journal, line_sign, payment_ratio,
+                line, revised_price)
 
         return tax_gp
 

@@ -47,10 +47,10 @@ class account_voucher(osv.osv):
 
     _columns = {
         'writeoff_amount': fields.function(
-           _get_writeoff_amount,
-           string='Difference Amount',
-           type='float', readonly=True,
-           help="""Computed as the difference between the amount stated in the
+            _get_writeoff_amount,
+            string='Difference Amount',
+            type='float', readonly=True,
+            help="""Computed as the difference between the amount stated in the
                    voucher and the sum of allocation on the voucher lines."""),
     }
 

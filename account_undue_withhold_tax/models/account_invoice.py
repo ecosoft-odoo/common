@@ -126,11 +126,12 @@ class account_invoice_tax(models.Model):
         tax_grouped = {}
         tax_obj = self.env['account.tax']
         currency = invoice.currency_id.with_context(
-                                        date=invoice.date_invoice or
-                                        fields.Date.context_today(invoice))
+            date=invoice.date_invoice or
+            fields.Date.context_today(invoice))
         company_currency = invoice.company_id.currency_id
         for line in invoice.invoice_line:
-            revised_price = (line.price_unit * (1-(line.discount or 0.0)/100))
+            revised_price = (
+                line.price_unit * (1 - (line.discount or 0.0) / 100.0))
             taxes = line.invoice_line_tax_id.compute_all(
                 revised_price,
                 line.quantity, line.product_id, invoice.partner_id)['taxes']
@@ -162,13 +163,13 @@ class account_invoice_tax(models.Model):
                     val['base_code_id'] = tax['base_code_id']
                     val['tax_code_id'] = tax['tax_code_id']
                     val['base_amount'] = currency.compute(
-                                            val['base'] * tax['base_sign'],
-                                            company_currency,
-                                            round=False)
+                        val['base'] * tax['base_sign'],
+                        company_currency,
+                        round=False)
                     val['tax_amount'] = currency.compute(
-                                            val['amount'] * tax['tax_sign'],
-                                            company_currency,
-                                            round=False)
+                        val['amount'] * tax['tax_sign'],
+                        company_currency,
+                        round=False)
                     val['account_id'] = (use_suspend_acct and
                                          tax['account_suspend_collected_id'] or
                                          tax['account_collected_id'] or
@@ -179,13 +180,13 @@ class account_invoice_tax(models.Model):
                     val['base_code_id'] = tax['ref_base_code_id']
                     val['tax_code_id'] = tax['ref_tax_code_id']
                     val['base_amount'] = currency.compute(
-                                            val['base'] * tax['ref_base_sign'],
-                                            company_currency,
-                                            round=False)
+                        val['base'] * tax['ref_base_sign'],
+                        company_currency,
+                        round=False)
                     val['tax_amount'] = currency.compute(
-                                        val['amount'] * tax['ref_tax_sign'],
-                                        company_currency,
-                                        round=False)
+                        val['amount'] * tax['ref_tax_sign'],
+                        company_currency,
+                        round=False)
                     val['account_id'] = (use_suspend_acct and
                                          tax['account_suspend_paid_id'] or
                                          tax['account_collected_id'] or
