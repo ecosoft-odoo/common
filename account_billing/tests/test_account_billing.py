@@ -24,33 +24,101 @@ import openerp.tests.common as common
 
 class TestAccountBilling(common.TransactionCase):
 
-    # 1. Create Billing Document, EUR, dated 17 this month.
-    # 2. Validate, only 1 line created, amount equal to 500 EUR.
-    # 3. Billed It.
-    # 4. Create Payment, whatever the date is, choose Billing ID
-    # 5. Amount equal to the billing
-
     def setUp(self):
+        """
+        Create 1st invoice, 100 THB, dated 15 this month
+        Create 2nd invoice, 200 THB, dated 20 this month
+        Confirm both invoices
+        """
         super(TestAccountBilling, self).setUp()
-        self.company_model = self.env['res.company']
-        self.bill_model = self.env['account.billing']
-        self.partner_model = self.env['res.partner']
-        self.partner_id = self.ref('base.res_partner_14')
-        self.currency_id = self.ref('base.EUR')
-        self.date = time.strftime('%Y-%m') + '-17'
-        self.company_id = \
-            self.company_model._company_default_get('account.billing')
+        # Model
+        self.billing_obj = self.env['account.billing']
+        self.billing_line_obj = self.env['account.billing.line']
+        self.invoice_obj = self.env['account.invoice']
+        self.voucher_obj = self.env['account.voucher']
+        # Master Data
+        self.company_id = self.env.user.company_id.id
+        self.partner_id = self.ref('base.res_partner_3')  # China Export
+        self.product_id = self.ref('sale.advance_product_0_product_template')
+        self.thb_currency_id = self.ref('base.THB')
+        self.eur_currency_id = self.ref('base.EUR')
+        self.date_15 = time.strftime('%Y-%m') + '-15'
+        self.date_17 = time.strftime('%Y-%m') + '-15'
+        self.date_20 = time.strftime('%Y-%m') + '-20'
+        self.date_25 = time.strftime('%Y-%m') + '-25'
+        # get account_id
+        self.account_id = self.invoice_obj.onchange_partner_id(
+            'out_invoice', self.partner_id,
+            date_invoice=self.date_15)['value']['account_id']
+        # create invoice#1 (dated 15)
+        self.invoice1 = self.invoice_obj.create({
+            'partner_id': self.partner_id,
+            'account_id': self.account_id,
+            'currency_id': self.thb_currency_id,
+            'date_invoice': self.date_15,
+            'invoice_line': [(0, 0, {
+                'product_id': self.product_id,
+                'name': 'Sample Product',
+                'quantity': 1,
+                'price_unit': 100,
+                'invoice_line_tax_id': [],
+            })]
+        })
+        # create invoice#1 (dated 20)
+        self.invoice2 = self.invoice_obj.create({
+            'partner_id': self.partner_id,
+            'account_id': self.account_id,
+            'currency_id': self.thb_currency_id,
+            'date_invoice': self.date_20,
+            'invoice_line': [(0, 0, {
+                'product_id': self.product_id,
+                'name': 'Sample Product',
+                'quantity': 1,
+                'price_unit': 200,
+                'invoice_line_tax_id': [],
+            })]
+        })
+        # confirm invoices
+        self.invoice1.signal_workflow('invoice_open')
+        self.invoice2.signal_workflow('invoice_open')
 
     def test_normal_case(self):
-        res = self.bill_model.onchange_currency_id(self.company_id,
-                                                   self.currency_id,
-                                                   self.partner_id,
-                                                   self.date,
-                                                   )
-        invoices = res['value']['line_cr_ids']
-        billing_amount = res['value']['billing_amount']
-        self.assertEqual(len(invoices), 1)
-        self.assertEqual(billing_amount, 500)  # Amount equal to invoice_1
+        """
+        Create billing document dated 17, THB
+        Check that billing amount = 1st invoice only
+        Confirm Billing and use it in Payment
+        """
+        # create billing dated 17
+        billing = self.billing_obj.create({
+            'partner_id': self.partner_id,
+            'date': self.date_17,
+            'currency_id': self.thb_currency_id,
+        })
+        billing_line_dict = self.billing_obj.onchange_partner_id(
+            self.company_id,
+            self.partner_id,
+            self.thb_currency_id,
+            self.date_17)['value']['line_cr_ids']
+        for line in billing_line_dict:
+            line.update({'billing_id': billing.id})
+            self.billing_line_obj.create(line)
+        # found only invoice 1
+        self.assertEquals(billing.billing_amount, 100.0)
+        # validate billing
+        billing.validate_billing()
+        # create payment voucher on 25 but use billing
+        journal_id = self.voucher_obj._get_journal()
+        res = self.voucher_obj.onchange_billing_id(
+            self.partner_id, journal_id, 0.0,
+            self.eur_currency_id, 'receipt', self.date_25)
+        # still match 2 invoice
+        self.assertEquals(len(res['value']['line_cr_ids']), 2)
+
+        res = self.voucher_obj.with_context(
+            billing_id=billing.id).onchange_billing_id(
+                self.partner_id, journal_id, 0.0,
+                self.eur_currency_id, 'receipt', self.date_25)
+        # billing assigned, match 1 invoice
+        self.assertEquals(len(res['value']['line_cr_ids']), 1)
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
-

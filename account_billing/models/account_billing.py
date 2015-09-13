@@ -118,10 +118,10 @@ class AccountBilling(models.Model):
         required=False,
         readonly=True)
     name = fields.Char(
-       string='Memo',
-       size=256,
-       readonly=True,
-       states={'draft': [('readonly', False)]})
+        string='Memo',
+        size=256,
+        readonly=True,
+        states={'draft': [('readonly', False)]})
 
     @api.model
     def _default_period(self):
@@ -153,14 +153,15 @@ class AccountBilling(models.Model):
     def onchange_partner_id(self, company_id,
                             partner_id, currency_id, date):
         ctx = self._context.copy()
-        ctx.update({'billing_date_condition': ['|',
-                                               ('date_maturity', '=', False),
-                                               ('date_maturity', '<=', date)]})
+        ctx.update(
+            {'billing_date_condition': ['|',
+                                        ('date_maturity', '=', False),
+                                        ('date_maturity', '<=', date)]}
+        )
         if not currency_id:
             return {'value': {'line_cr_ids': []}}
-        res = self.recompute_billing_lines(company_id,
-                                           partner_id,
-                                           currency_id, date, context=ctx)
+        res = self.with_context(ctx).recompute_billing_lines(
+            company_id, partner_id, currency_id, date)
         return res
 
     def recompute_billing_lines(self, cr, uid, ids, company_id,
@@ -292,8 +293,8 @@ class AccountBilling(models.Model):
         for billing in self:
             if billing.state not in ('draft', 'cancel'):
                 raise except_orm(
-                     _('Invalid Action!'),
-                     _('Cannot delete billing(s) which are already billed.'))
+                    _('Invalid Action!'),
+                    _('Cannot delete billing(s) which are already billed.'))
         return super(AccountBilling, self).unlink()
 
     _document_type = {
