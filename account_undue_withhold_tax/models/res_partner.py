@@ -36,7 +36,7 @@ class res_partner(models.Model):
         string="Account Retention Customer",
         company_dependent=True,
         domain="[('type', '!=', 'view')]",
-        required=True,
+        required=False,
         readonly=True,
         help="""This account will be used instead of the default one
                 as the retention account for the current partner""")
@@ -45,7 +45,7 @@ class res_partner(models.Model):
         string="Account Retention Supplier",
         company_dependent=True,
         domain="[('type', '!=', 'view')]",
-        required=True,
+        required=False,
         readonly=True,
         help="""This account will be used instead of the default one as the
                 retention account for the current partner""")
