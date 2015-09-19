@@ -192,13 +192,16 @@ class account_voucher(common_voucher, models.Model):
                     line['move_line_id'],
                     line['amount_original'],
                     line['amount_original'])
+            print 'original_amount: ' + str(original_amount)
+            print 'original_wht_amt: ' + str(original_wht_amt)
+            print 'original_retention_amt: ' + str(original_retention_amt)
             # Full amount to reconcile
             new_amt_orig = (original_amount -
                             original_wht_amt -
                             original_retention_amt)
-            ratio = new_amt_orig / original_amount
-            amount_alloc = (original_amount > 0.0) and \
-                (line['amount_unreconciled'] * ratio) or 0.0
+            ratio = original_amount > 0.0 and \
+                new_amt_orig / original_amount or 0.0
+            amount_alloc = line['amount_unreconciled'] * ratio
             # Allocations Amount
             if ttype == 'payment':  # Supplier Payment
                 if line['type'] == 'cr':  # always full allocation.
