@@ -384,6 +384,7 @@ class account_voucher(common_voucher, models.Model):
                 name, company_currency,
                 current_currency, local_context)
             if ml_writeoff:
+                print ml_writeoff
                 move_line_pool.create(cr, uid, ml_writeoff, local_context)
             # We post the voucher.
             self.write(cr, uid, [voucher.id], {
