@@ -192,9 +192,6 @@ class account_voucher(common_voucher, models.Model):
                     line['move_line_id'],
                     line['amount_original'],
                     line['amount_original'])
-            print 'original_amount: ' + str(original_amount)
-            print 'original_wht_amt: ' + str(original_wht_amt)
-            print 'original_retention_amt: ' + str(original_retention_amt)
             # Full amount to reconcile
             new_amt_orig = (original_amount -
                             original_wht_amt -
@@ -384,7 +381,6 @@ class account_voucher(common_voucher, models.Model):
                 name, company_currency,
                 current_currency, local_context)
             if ml_writeoff:
-                print ml_writeoff
                 move_line_pool.create(cr, uid, ml_writeoff, local_context)
             # We post the voucher.
             self.write(cr, uid, [voucher.id], {
