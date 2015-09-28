@@ -18,25 +18,14 @@
 #
 #
 {
-    'name': "Billing Process",
-    'summary': "Group invoice as billing before payment",
+    'name': "Voucher's recompute voucher line hook",
+    'summary': "Provide a hook point for account_voucher.recompute_vline",
     'author': "Ecosoft,Odoo Community Association (OCA)",
     'website': "http://ecosoft.co.th",
     'category': 'Account',
     'version': '0.1.0',
-    'depends': ['account',
-                'account_voucher',
-                'account_accountant',
-                'account_billing_hook_recompute_vline',
+    'depends': ['account_voucher',
                 ],
-    'data': [
-        'data/account_billing_data.xml',
-        'data/account_billing_sequence.xml',
-        'data/account_billing_workflow.xml',
-        'security/ir.model.access.csv',
-        'views/account_billing.xml',
-        'views/voucher_payment_receipt_view.xml',
-        ],
     'installable': True,
 }
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

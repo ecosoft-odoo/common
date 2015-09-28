@@ -17,26 +17,27 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 #
-{
-    'name': "Billing Process",
-    'summary': "Group invoice as billing before payment",
-    'author': "Ecosoft,Odoo Community Association (OCA)",
-    'website': "http://ecosoft.co.th",
-    'category': 'Account',
-    'version': '0.1.0',
-    'depends': ['account',
-                'account_voucher',
-                'account_accountant',
-                'account_billing_hook_recompute_vline',
-                ],
-    'data': [
-        'data/account_billing_data.xml',
-        'data/account_billing_sequence.xml',
-        'data/account_billing_workflow.xml',
-        'security/ir.model.access.csv',
-        'views/account_billing.xml',
-        'views/voucher_payment_receipt_view.xml',
-        ],
-    'installable': True,
-}
+
+from openerp import models
+
+
+class AccountVoucher(models.Model):
+
+    _inherit = 'account.voucher'
+
+    def finalize_voucher_move_lines(self, cr, uid, ids, account_move_lines,
+                                    partner_id, journal_id, price,
+                                    currency_id, ttype, date, context=None):
+        """ finalize_account_move_lines(move_lines) -> move_lines
+
+            Hook method to be overridden in additional modules to verify and
+            possibly alter the move lines to be created by an voucher, for
+            special cases.
+            :param move_lines: list of dictionaries with the account.move.lines
+            (as for create())
+            :return: the (possibly updated) final move_lines to create for
+            this voucher
+        """
+        return account_move_lines
+
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
