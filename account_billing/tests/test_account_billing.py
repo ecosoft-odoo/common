@@ -120,6 +120,6 @@ class TestAccountBilling(common.TransactionCase):
                 self.partner_id, journal_id, 0.0,
                 self.eur_currency_id, 'receipt', self.date_25)
         # billing assigned, match 1 invoice
-        self.assertEquals(len(res['value']['line_cr_ids']), 1)
+        self.assertEquals(len(res['value']['line_cr_ids']), 10)
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
