@@ -1,7 +1,7 @@
-##############################################################################
+# -*- coding: utf-8 -*-
 #
-#    OpenERP, Open Source Management Solution
-#    Copyright (C) 2004-2010 Tiny SPRL (<http://tiny.be>).
+#    Author: Kitti Upariphutthiphong
+#    Copyright 2014-2015 Ecosoft Co., Ltd.
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as
@@ -16,7 +16,7 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-##############################################################################
+#
 
 from openerp.osv import fields, osv
 from openerp.tools.translate import _
@@ -31,7 +31,8 @@ class purchase_advance_payment_inv(osv.osv_memory):
         'line_percent': fields.float(
             'Installment',
             digits_compute=dp.get_precision('Account'),
-            help="The % of installment to be used to calculate the quantity to invoice"),
+            help="The % of installment to be used to "
+            "calculate the quantity to invoice"),
     }
 
     _defaults = {
@@ -59,20 +60,25 @@ class purchase_advance_payment_inv(osv.osv_memory):
             # Assign them into active_ids
             context.update({'active_ids': order_line_ids})
             context.update({'line_percent': wizard.line_percent})
-            purchase_order_line_make_invoice_obj = self.pool.get('purchase.order.line_invoice')
-            res = purchase_order_line_make_invoice_obj.makeInvoices(cr, uid, ids, context=context)
+            purchase_order_line_make_invoice_obj = self.pool.get(
+                'purchase.order.line_invoice')
+            res = purchase_order_line_make_invoice_obj.makeInvoices(
+                cr, uid, ids, context=context)
             if not context.get('open_invoices', False):
                 return {'type': 'ir.actions.act_window_close'}
             return res
- 
-        return super(purchase_advance_payment_inv, self).create_invoices(cr, uid, ids, context=context)
+
+        return super(purchase_advance_payment_inv, self).create_invoices(
+            cr, uid, ids, context=context)
 
     def open_invoices(self, cr, uid, ids, invoice_ids, context=None):
         """ open a view on one of the given invoice_ids """
         ir_model_data = self.pool.get('ir.model.data')
-        form_res = ir_model_data.get_object_reference(cr, uid, 'account', 'invoice_supplier_form')
+        form_res = ir_model_data.get_object_reference(
+            cr, uid, 'account', 'invoice_supplier_form')
         form_id = form_res and form_res[1] or False
-        tree_res = ir_model_data.get_object_reference(cr, uid, 'account', 'invoice_tree')
+        tree_res = ir_model_data.get_object_reference(
+            cr, uid, 'account', 'invoice_tree')
         tree_id = tree_res and tree_res[1] or False
 
         return {
