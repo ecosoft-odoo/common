@@ -187,7 +187,7 @@ class AccountBilling(models.Model):
         if not partner_id or not currency_id:
             return default
 
-        account_type = ('receivable')
+        account_type = ('payable', 'receivable')
         # if currency_id = company currency, it value could be false.
         company = self.pool.get('res.company').browse(cr, uid, company_id)
         if company and company.currency_id.id == currency_id:
@@ -196,16 +196,17 @@ class AccountBilling(models.Model):
             currency_domain = [('currency_id', '=', currency_id)]
 
         ids = move_line_pool.search(cr, uid, [
-            ('state', '=', 'valid'),
-            ('account_id.type', 'in', account_type),
-            ('reconcile_id', '=', False),
-            ('partner_id', '=', partner_id)
-        ] + currency_domain + billing_date_condition, context=context)
+                ('state', '=', 'valid'),
+                ('account_id.type', 'in', account_type),
+                ('reconcile_id', '=', False),
+                ('partner_id', '=', partner_id)
+            ] + currency_domain + billing_date_condition,
+            order="id desc", context=context)
 
-        # Order the lines by most old first
-        ids.reverse()
         account_move_lines = move_line_pool.browse(cr, uid, ids,
                                                    context=context)
+        account_move_lines = account_move_lines.sorted(lambda x:
+                                                       x.journal_id.id)
         # Billing line creation
         for line in account_move_lines:
             if _remove_noise_in_o2m():
@@ -218,6 +219,7 @@ class AccountBilling(models.Model):
             amount_unreconciled = abs(line.amount_residual_currency)
             amount = amount_unreconciled
             rs = {
+                'journal_id': line.journal_id.id,
                 'move_line_id': line.id,
                 'type': line.credit and 'dr' or 'cr',
                 'reference': line.invoice.reference,
@@ -314,13 +316,15 @@ class AccountBillingLine(models.Model):
 
     _name = 'account.billing.line'
     _description = 'Billing Lines'
-    _order = 'move_line_id'
 
+    journal_id = fields.Many2one(
+        'account.journal',
+        string='Journal',)
     billing_id = fields.Many2one(
         'account.billing',
         string='billing',
         required=1,
-        ondelete='cascade')
+        ondelete='cascade',)
     name = fields.Char(
         string='Description',
         size=256)

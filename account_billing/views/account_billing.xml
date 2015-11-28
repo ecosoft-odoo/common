@@ -71,7 +71,10 @@
                         <page string="Payment Information" groups="base.group_user">
                             <field name="line_cr_ids" >
                                 <tree string="Invoices and outstanding transactions" editable="bottom" colors="gray:amount==0">
-                                    <field name="reconcile" string="Select" on_change="onchange_reconcile(reconcile, amount, amount_unreconciled)" groups="account.group_account_user"/>
+                                    <field name="reconcile" string="Select" 
+                                    	on_change="onchange_reconcile(reconcile, amount, amount_unreconciled)"
+                                    	groups="account.group_account_user"/>
+                                    <field name="journal_id" invisible="1"/>
                                     <field name="move_line_id"
                                         required="1" readonly="1"
                                         groups="account.group_account_user"/>
