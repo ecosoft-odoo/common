@@ -187,7 +187,7 @@ class AccountBilling(models.Model):
         if not partner_id or not currency_id:
             return default
 
-        account_type = ('payable', 'receivable')
+        account_type = ('receivable')
         # if currency_id = company currency, it value could be false.
         company = self.pool.get('res.company').browse(cr, uid, company_id)
         if company and company.currency_id.id == currency_id:
