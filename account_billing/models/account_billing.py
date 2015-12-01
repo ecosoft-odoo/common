@@ -200,13 +200,13 @@ class AccountBilling(models.Model):
                 ('account_id.type', 'in', account_type),
                 ('reconcile_id', '=', False),
                 ('partner_id', '=', partner_id)
-            ] + currency_domain + billing_date_condition,
-            order="id desc", context=context)
+            ] + currency_domain + billing_date_condition,  context=context)
 
         account_move_lines = move_line_pool.browse(cr, uid, ids,
                                                    context=context)
-        account_move_lines = account_move_lines.sorted(lambda x:
-                                                       x.journal_id.sequence)
+        account_move_lines = account_move_lines.sorted(
+            lambda x: x.move_id.name).sorted(
+                lambda x: x.journal_id.sequence)
         # Billing line creation
         for line in account_move_lines:
             if _remove_noise_in_o2m():
