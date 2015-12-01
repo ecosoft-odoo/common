@@ -206,7 +206,7 @@ class AccountBilling(models.Model):
         account_move_lines = move_line_pool.browse(cr, uid, ids,
                                                    context=context)
         account_move_lines = account_move_lines.sorted(lambda x:
-                                                       x.journal_id.id)
+                                                       x.journal_id.sequence)
         # Billing line creation
         for line in account_move_lines:
             if _remove_noise_in_o2m():

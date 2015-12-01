@@ -18,6 +18,13 @@
 #
 #
 
-from . import account_billing
-from . import account_voucher
-from . import account
+from openerp import fields, models, api
+
+
+class AccountJournal(models.Model):
+    _inherit = 'account.journal'
+
+    sequence = fields.Integer('Sequence', default=0)
+
+
+# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
