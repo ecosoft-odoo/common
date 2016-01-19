@@ -364,13 +364,15 @@ class account_transfer(osv.osv):
                 trans.src_journal_id.default_credit_account_id.id
             dval['account_id'] = \
                 trans.dst_journal_id.default_debit_account_id.id
-            sval['payment_rate'] = trans.src_journal_id.currency.id and \
-                (trans.company_id.currency_id.id !=
-                 trans.src_journal_id.currency.id) and \
-                trans.exchange_rate or 1.0
-            dval['payment_rate'] = trans.dst_journal_id.currency.id and \
-                (trans.company_id.currency_id.id != trans.dst_journal_id.currency.id) and \
-                trans.exchange_inv or 1.0
+            sval['payment_rate'] = 0.0
+            dval['payment_rate'] = 0.0
+#             sval['payment_rate'] = trans.src_journal_id.currency.id and \
+#                 (trans.company_id.currency_id.id !=
+#                  trans.src_journal_id.currency.id) and \
+#                 trans.exchange_rate or 1.0
+#             dval['payment_rate'] = trans.dst_journal_id.currency.id and \
+#                 (trans.company_id.currency_id.id != trans.dst_journal_id.currency.id) and \
+#                 trans.exchange_inv or 1.0
             sval['payment_rate_currency_id'] = \
                 trans.dst_journal_id.currency.id or \
                 trans.company_id.currency_id.id
