@@ -367,10 +367,10 @@ class account_transfer(osv.osv):
             sval['payment_rate'] = trans.src_journal_id.currency.id and \
                 (trans.company_id.currency_id.id !=
                  trans.src_journal_id.currency.id) and \
-                trans.exchange_inv or 1.0
+                trans.exchange_rate or 1.0
             dval['payment_rate'] = trans.dst_journal_id.currency.id and \
                 (trans.company_id.currency_id.id != trans.dst_journal_id.currency.id) and \
-                trans.exchange_rate or 1.0
+                trans.exchange_inv or 1.0
             sval['payment_rate_currency_id'] = \
                 trans.dst_journal_id.currency.id or \
                 trans.company_id.currency_id.id
