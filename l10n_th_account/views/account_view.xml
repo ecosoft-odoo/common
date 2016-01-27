@@ -10,8 +10,8 @@
 		        <field name="price_include" position="after">
 		            <field name="is_wht" />
 		            <field name="threshold_wht" attrs="{'invisible': [('is_wht','=',False)]}"/>
-		            <field name="is_suspend_tax" />
-		            <field name="refer_tax_id" attrs="{'invisible': [('is_suspend_tax','=',False)]}" class="oe_inline"/>
+		            <field name="is_undue_tax" />
+		            <field name="refer_tax_id" attrs="{'invisible': [('is_undue_tax','=',False)]}" class="oe_inline"/>
 		        </field>
 			</field>
 		</record>
@@ -22,7 +22,8 @@
 		    <field name="inherit_id" ref="account.view_tax_tree"/>
 		    <field name="arch" type="xml">
 		        <field name="description" position="after">
-		            <field name="is_suspend_tax"/>
+		            <field name="is_undue_tax"/>
+		            <field name="is_wht"/>
 		        </field>
 		    </field>
 		</record>    

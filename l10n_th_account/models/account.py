@@ -25,10 +25,10 @@ class account_tax(models.Model):
 
     _inherit = 'account.tax'
 
-    is_suspend_tax = fields.Boolean(
-        string='Suspend Tax',
+    is_undue_tax = fields.Boolean(
+        string='Undue Tax',
         default=False,
-        help="""This is a suspended tax account.
+        help="""This is a undue tax account.
                 The tax point will be deferred to the time of payment""",
     )
     is_wht = fields.Boolean(
@@ -71,11 +71,11 @@ class account_tax(models.Model):
     @api.one
     @api.depends('is_wht')
     def onchange_is_wht(self):
-        self.is_suspend_tax = False
+        self.is_undue_tax = False
 
     @api.one
-    @api.depends('is_suspend_tax')
-    def onchange_is_suspend_tax(self, is_suspend_tax):
+    @api.depends('is_undue_tax')
+    def onchange_is_undue_tax(self, is_undue_tax):
         self.is_wht = False
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

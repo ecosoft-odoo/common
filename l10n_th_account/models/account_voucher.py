@@ -844,7 +844,7 @@ class account_voucher_tax(common_voucher, models.Model):
                 voucher_cur.round(
                     tax['price_unit'] * line.quantity) *
                 payment_ratio * line_sign)
-            # For Suspend
+            # For Undue
             vals = {}
             vals['voucher_id'] = voucher.id
             vals['invoice_id'] = invoice.id
@@ -867,10 +867,9 @@ class account_voucher_tax(common_voucher, models.Model):
             val['tax_currency_gain'] = -(val['amount'] + vals['amount'])
             vals['tax_currency_gain'] = 0.0
 
-            # Check the if services, which has been using suspend account
-            # This time, it needs to cr: non-suspend acct and dr: suspend acct
+            # Check the if services, which has been using undue account
+            # This time, it needs to cr: non-undue acct and dr: undue acct
             tax1 = tax_obj.browse(tax['id'])
-            use_suspend_acct = tax1.is_suspend_tax
             is_wht = tax1.is_wht
             # -------------------> Adding Tax for Posting
             if is_wht:
@@ -934,9 +933,9 @@ class account_voucher_tax(common_voucher, models.Model):
                     tax_gp[key]['tax_amount'] -= val['tax_amount']
                     tax_gp[key]['tax_currency_gain'] -= 0.0  # No gain for WHT
 
-            # --> Adding Tax for Posting 1) Contra-Suspend 2) Non-Suspend
-            elif use_suspend_acct:
-                # First: Do the Cr: with Non-Suspend Account
+            # --> Adding Tax for Posting 1) Contra-Undue 2) Non-Undue
+            elif tax1.is_undue_tax:
+                # First: Do the Cr: with Non-Undue Account
                 refer_tax = tax_obj.browse(val['tax_id']).refer_tax_id
                 # Change name to refer_tax_id
                 vals['name'] = tax1.refer_tax_id.name
@@ -992,7 +991,7 @@ class account_voucher_tax(common_voucher, models.Model):
                     tax_gp[key]['tax_currency_gain'] += \
                         val['tax_currency_gain']
 
-                # Second: Do the Dr: with Suspend Account
+                # Second: Do the Dr: with Undue Account
                 if voucher.type in ('receipt', 'payment'):
                     vals['base_code_id'] = tax['base_code_id']
                     vals['tax_code_id'] = tax['tax_code_id']
@@ -1004,7 +1003,7 @@ class account_voucher_tax(common_voucher, models.Model):
                         val['amount'] *
                         tax['tax_sign'],
                         company_currency) * payment_ratio
-                    # USE SUSPEND ACCOUNT HERE
+                    # USE UNDUE ACCOUNT HERE
                     vals['account_id'] = \
                         (tax1.refer_tax_id.account_collected_id.id or
                          line.account_id.id)
@@ -1021,7 +1020,7 @@ class account_voucher_tax(common_voucher, models.Model):
                         val['amount'] *
                         tax['ref_tax_sign'],
                         company_currency) * payment_ratio
-                    # USE SUSPEND ACCOUNT HERE
+                    # USE UNDUE ACCOUNT HERE
                     vals['account_id'] = \
                         (tax1.refer_tax_id.account_paid_id.id or
                          line.account_id.id)
