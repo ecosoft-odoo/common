@@ -39,6 +39,7 @@ class AccountActivity(models.Model):
         'account.account',
         string='Account',
         required=True,
+        domain=[('type', '!=', 'view')],
     )
     _sql_constraints = [
         ('activity_uniq', 'unique(name, group_id)',

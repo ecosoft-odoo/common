@@ -14,11 +14,11 @@
                     <attribute name="readonly">1</attribute>
                 </xpath>
                 <xpath expr="/form/sheet/notebook/page/field/tree/field[@name='analytic_account_id']" position="before">
-                    <field name="activity_group_id" invisible="1"/>
+                    <field name="activity_group_id" />
                     <field name="activity_id" />
                 </xpath>
                 <xpath expr="/form/sheet/notebook/page/field/form//field[@name='analytic_account_id']" position="before">
-                    <field name="activity_group_id" invisible="1"/>
+                    <field name="activity_group_id" />
                     <field name="activity_id" />
                 </xpath>
         	</field>

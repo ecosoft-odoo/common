@@ -9,7 +9,7 @@
             <field name="arch" type="xml">
                 <xpath expr="/form/sheet/div[@class='oe_title']" position="after">
                 	<group name="multi_dimension" >
-                		<group name="dimension" >
+                		<group name="charge_fields" >
                 		</group>
                 		<group name="activity" >
 		                    <field name="activity_group_id" invisible="1" />
