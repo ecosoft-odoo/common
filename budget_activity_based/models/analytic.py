@@ -80,7 +80,7 @@ class AccountAnalyticAccount(models.Model):
         domain.append(('type', '=', 'activity'))
         analytics = self.env['account.analytic.account'].search(domain)
         if analytics:
-            analytics.ensure_one()
+            #analytics.ensure_one()
             return analytics[0]
         return False
 
@@ -97,7 +97,7 @@ class AccountAnalyticAccount(models.Model):
             vals['type'] = 'activity'
             return Analytic.create(vals)
         else:
-            analytics.ensure_one()
+            #analytics.ensure_one()
             return analytics[0]
 
 

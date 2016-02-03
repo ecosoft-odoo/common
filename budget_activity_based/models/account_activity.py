@@ -17,10 +17,25 @@ class AccountActivityGroup(models.Model):
         'activity_group_id',
         string='Activities',
     )
+    account_id = fields.Many2one(
+        'account.account',
+        string='Account',
+        domain=[('type', '!=', 'view')],
+        help="This account has less priority to activitie's account",
+    )
     _sql_constraints = [
         ('activity_uniq', 'unique(name)',
          'Activity Group must be unique!'),
     ]
+
+    @api.one
+    @api.constrains('account_id', 'activity_ids')
+    def _check_account_id(self):
+        if not self.account_id and \
+                self.env['account.activity'].search_count(
+                    [('activity_group_id', '=', self.id),
+                     ('account_id', '=', False)]) > 0:
+            raise Warning(_('Please select account in group or in activity!'))
 
 
 class AccountActivity(models.Model):
@@ -38,11 +53,11 @@ class AccountActivity(models.Model):
     account_id = fields.Many2one(
         'account.account',
         string='Account',
-        required=True,
         domain=[('type', '!=', 'view')],
+        help="This account has higher priority to group activities's account",
     )
     _sql_constraints = [
-        ('activity_uniq', 'unique(name, group_id)',
+        ('activity_uniq', 'unique(name, activity_group_id)',
          'Activity must be unique per group!'),
     ]
 
@@ -55,3 +70,10 @@ class AccountActivity(models.Model):
                  "%s / %s" % (activity.activity_group_id.name or '-',
                               activity.name or '-')))
         return result
+
+    @api.one
+    @api.constrains('account_id')
+    def _check_account_id(self):
+        if not self.account_id and not self.activity_group_id.account_id:
+            raise Warning(_('Please select account for activity in group %s!' %
+                            (self.activity_group_id.name,)))

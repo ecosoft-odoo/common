@@ -9,6 +9,38 @@ from openerp.exceptions import except_orm, Warning, RedirectWarning
 class CrossoveredBudget(models.Model):
     _inherit = 'crossovered.budget'
 
+    version = fields.Integer(
+        string='Version',
+        readonly=True,
+        default=1,
+        help="Indicate revision of the same budget plan. "
+        "Only latest one is used",
+    )
+    latest_version = fields.Boolean(
+        string='Current',
+        readonly=True,
+        default=True,
+        # compute='_compute_latest_version',  TODO: determine version
+        help="Indicate latest revision of the same plan.",
+    )
+    fiscalyear_id = fields.Many2one(
+        'account.fiscalyear',
+        string='Fiscal Year',
+        required=True,
+    )
+    date_from = fields.Date(
+        compute='_compute_date',
+    )
+    date_to = fields.Date(
+        compute='_compute_date',
+    )
+
+    @api.one
+    @api.depends('fiscalyear_id')
+    def _compute_date(self):
+        self.date_from = self.fiscalyear_id.date_start
+        self.date_to = self.fiscalyear_id.date_stop
+
     @api.multi
     def budget_validate(self):
         for budget in self:
@@ -30,6 +62,24 @@ class CrossoveredBudgetLines(models.Model):
         domain="['|', ('activity_group_id', '=', activity_group_id),"
         "('activity_group_id', '=', False)]"
     )
+    period_id = fields.Many2one(
+        'account.period',
+        string='Period',
+        required=True,
+        domain="[('fiscalyear_id', '=', parent.fiscalyear_id)]",
+    )
+    date_from = fields.Date(
+        compute='_compute_date',
+    )
+    date_to = fields.Date(
+        compute='_compute_date',
+    )
+
+    @api.one
+    @api.depends('period_id')
+    def _compute_date(self):
+        self.date_from = self.period_id.date_start
+        self.date_to = self.period_id.date_stop
 
     @api.onchange('activity_id')
     def onchange_activity_id(self):

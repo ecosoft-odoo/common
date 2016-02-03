@@ -19,6 +19,7 @@
             <field name="arch" type="xml">
                 <tree string="Activity Group">
                     <field name="name"/>
+                    <field name="account_id"/>
                 </tree>
             </field>
         </record>
@@ -42,6 +43,7 @@
 	                        <field name="name"/>
                     	</group>
                         <group>
+                    		<field name="account_id"/>
                         </group>
                     </group>
                     <field name="activity_ids">
