@@ -33,8 +33,8 @@ Comply with account_undue_withhold_tax module for Retention and WHT amount.
     'sequence': 4,
     'website' : 'http://www.ecosoft.co.th',
     'images' : [],
-    'depends' : ['amount_to_word',
-                 'account_undue_withhold_tax'],
+    'depends' : ['l10n_th_amount_text',
+                 'l10n_th_account'],
     'demo' : [],
     'data' : [
     ],
