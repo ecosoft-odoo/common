@@ -25,7 +25,7 @@
                 <xpath expr="/form/header" position="replace" >
 					<!-- Header for Sales Order (Default) -->
                     <header name="sale_order" attrs="{'invisible': [('order_type','=','quotation')]}" >
-                        <button name="invoice_recreate" states="invoice_except" string="Recreate Invoice Z" groups="base.group_user"/>
+                        <button name="invoice_recreate" states="invoice_except" string="Recreate Invoice" groups="base.group_user"/>
                         <button name="invoice_corrected" states="invoice_except" string="Ignore Exception" groups="base.group_user"/>
                         <!-- from sale_stock.view_order_form -->
                        	<button name="ship_recreate" states="shipping_except" string="Recreate Delivery Order"/>
