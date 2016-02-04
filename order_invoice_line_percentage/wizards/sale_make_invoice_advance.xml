@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <openerp>
     <data>
-        <record id="view_sale_advance_payment_inv_ext" model="ir.ui.view">
-            <field name="name">view.sale.advance.payment.inv.ext</field>
+        <record id="view_sale_advance_payment_inv" model="ir.ui.view">
+            <field name="name">view.sale.advance.payment.inv</field>
             <field name="model">sale.advance.payment.inv</field>
             <field name="inherit_id" ref="sale.view_sale_advance_payment_inv"/>
             <field name="arch" type="xml">
