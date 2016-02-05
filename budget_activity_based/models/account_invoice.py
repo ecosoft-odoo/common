@@ -13,7 +13,7 @@ class AccountInvoice(models.Model):
     def action_move_create(self):
         for inv in self:
             for line in inv.invoice_line:
-                if not line.account_analytic_id and line.activity_id:
+                if line.activity_id:
                     Analytic = self.env['account.analytic.account']
                     line.account_analytic_id = \
                         Analytic.create_matched_analytic(line)
