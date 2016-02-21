@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 ##############################################################################
 #
-#    OpenERP, Open Source Management Solution
-#    Copyright (C) 2004-2010 Tiny SPRL (<http://tiny.be>).
+#    Author: Jordi Ballester (Eficent)
+#    Copyright 2015 Eficent
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as
@@ -19,7 +19,23 @@
 #
 ##############################################################################
 
-from . import sale_create_invoice_plan
-from . import sale_make_invoice_advance
+{
+    'name': 'Account Vouchers Move Line Create Hookd',
+    'version': '1.0',
+    'category': 'Generic Modules/Sales & Purchases',
+    'description': '''
+Account Vouchers Move Line Create Hooks
+=======================================
+This module reimplements the method that creates the account moves from the
+voucher, with the same basic result as in the standard case.
 
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
+Hooks are provided for extra modules can influence the data that is passed
+to the account moves.
+
+''',
+    'author': "Eficent",
+    'website': 'http://www.eficent.com',
+    'depends': ['account_voucher'],
+    'data': [],
+    'installable': True,
+}
