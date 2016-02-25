@@ -25,6 +25,10 @@ class AccountVoucher(models.Model):
     _inherit = "account.voucher"
 
     @api.model
+    def _finalize_voucher(self, voucher):
+        return voucher
+
+    @api.model
     def _finalize_line_total(self, voucher, line_total,
                              move_id, company_currency,
                              current_currency):
@@ -113,6 +117,9 @@ class AccountVoucher(models.Model):
                 'state': 'posted',
                 'number': name,
             })
+            # HOOK
+            voucher = self._finalize_voucher(cr, uid, voucher, context)
+            # --
             if voucher.journal_id.entry_posted:
                 move_pool.post(cr, uid, [move_id], context={})
             # We automatically reconcile the account move lines.
