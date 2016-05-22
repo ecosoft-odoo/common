@@ -1,4 +1,22 @@
 # -*- coding: utf-8 -*-
+#
+#    Author: Kitti Upariphutthiphong
+#    Copyright 2014-2015 Ecosoft Co., Ltd.
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU Affero General Public License as
+#    published by the Free Software Foundation, either version 3 of the
+#    License, or (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU Affero General Public License for more details.
+#
+#    You should have received a copy of the GNU Affero General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+#
 
 {
     'name': 'Order to Invoice by Percent',
@@ -40,11 +58,7 @@ evenly by percentage of the invoice amount.
     'website': 'http://www.ecosoft.co.th',
     'images': [],
     'depends': ['sale',
-                'purchase',
-                'sale_order_action_invoice_create_hooks',
-                'sale_order_make_invoice_hooks',
-                'sale_wizard_make_invoices_hooks',
-                ],
+                'purchase'],
     'demo': [],
     'data': ['wizards/sale_make_invoice_advance.xml',
              'wizards/purchase_make_invoice_advance.xml',
